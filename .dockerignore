@@ -1,0 +1,12 @@
+.git
+.bundle
+.env
+.env.*
+.idea
+log/*
+tmp/*
+vendor/bundle
+storage/*
+config/master.key
+data/routes/Afternoon_Run.gpx
+!.keep

@@ -1,0 +1,36 @@
+# Bundler
+/.bundle/
+/vendor/bundle/
+
+# Environment files
+/.env
+/.env.*
+
+# Rails runtime files
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+!/tmp/pids/
+!/tmp/pids/.keep
+!/tmp/storage/
+!/tmp/storage/.keep
+
+# Local storage
+/storage/*
+!/storage/.keep
+
+# Credentials
+/config/master.key
+
+# Local/manual GPX used for validation. Official route GPX files can be
+# force-added intentionally when they are approved for versioning.
+/data/routes/Afternoon_Run.gpx
+
+# Editors
+/.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

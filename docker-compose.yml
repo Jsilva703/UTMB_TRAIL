@@ -1,0 +1,33 @@
+services:
+  api:
+    build:
+      context: .
+      target: development
+    command: bash -lc "bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0"
+    environment:
+      RAILS_ENV: development
+      POSTGRES_HOST: db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in an ignored .env file or shell environment}
+      POSTGRES_DB: ${POSTGRES_DB:-utmb_trail_development}
+      POSTGRES_TEST_DB: ${POSTGRES_TEST_DB:-utmb_trail_test}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in an ignored .env file or shell environment}
+      POSTGRES_DB: ${POSTGRES_DB:-utmb_trail_development}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
