@@ -45,6 +45,7 @@ RSpec.configure do |config|
     RaceRoute.delete_all
     Athlete.delete_all
     Race.delete_all
+    AdminUser.delete_all
   end
 
   # You can uncomment this line to turn off ActiveRecord support entirely.
@@ -77,6 +78,12 @@ RSpec.configure do |config|
 
     def auth_headers(token)
       { "Authorization" => "Bearer #{token}" }
+    end
+
+    def login_admin(admin_user)
+      post "/api/v1/admin/session",
+           params: { email: admin_user.email, password: "password123" },
+           as: :json
     end
   }
 end

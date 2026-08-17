@@ -24,6 +24,10 @@ module Api
           }
         end
 
+        def route
+          render json: PublicRaceRouteSerializer.new(@tracking_session.race.race_route).as_json
+        end
+
         private
 
         def set_tracking_session

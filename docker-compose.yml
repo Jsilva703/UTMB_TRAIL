@@ -8,7 +8,7 @@ services:
       RAILS_ENV: development
       POSTGRES_HOST: db
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in an ignored .env file or shell environment}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-utmb_trail_development}
       POSTGRES_TEST_DB: ${POSTGRES_TEST_DB:-utmb_trail_test}
     ports:
@@ -22,7 +22,7 @@ services:
     image: postgres:16
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in an ignored .env file or shell environment}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-utmb_trail_development}
     ports:
       - "5432:5432"

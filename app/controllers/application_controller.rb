@@ -19,6 +19,10 @@ class ApplicationController < ActionController::API
     render json: { error: error.message }, status: :forbidden
   end
 
+  def render_unauthorized(message = "unauthorized")
+    render json: { error: message }, status: :unauthorized
+  end
+
   def bearer_token
     request.authorization.to_s.match(/\ABearer (.+)\z/)&.captures&.first
   end

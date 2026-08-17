@@ -165,8 +165,77 @@ RSpec.describe "Tracking API", type: :request do
       expect(response.body).not_to include("tracking_session_id")
     end
 
+    it "returns the public race route without internal ids or tokens" do
+      get "/api/v1/public/tracking/#{tracking_session.public_token}/route"
+
+      expect(response).to have_http_status(:ok)
+      expect(json["route"]).to include(
+        "source_filename" => "sample.gpx",
+        "total_distance_m" => 1000.0,
+        "points_count" => 2
+      )
+      expect(json["route"].keys).to contain_exactly(
+        "source_filename",
+        "total_distance_m",
+        "points_count",
+        "points"
+      )
+      expect(response.body).not_to include("id")
+      expect(response.body).not_to include("race_id")
+      expect(response.body).not_to include("race_route_id")
+      expect(response.body).not_to include("public_token")
+      expect(response.body).not_to include("ingest_token")
+      expect(response.body).not_to include(tracking_session.ingest_token)
+    end
+
+    it "returns route points ordered by sequence with the expected fields" do
+      route = race.race_route
+      RoutePoint.create!(
+        race_route: route,
+        sequence: 2,
+        latitude: -23.14,
+        longitude: -44.14,
+        altitude: 710.5,
+        cumulative_distance_m: 1200
+      )
+
+      get "/api/v1/public/tracking/#{tracking_session.public_token}/route"
+
+      expect(response).to have_http_status(:ok)
+      expect(json["route"]["points"].map { |point| point["sequence"] }).to eq([0, 1, 2])
+      expect(json["route"]["points"].first).to eq(
+        "sequence" => 0,
+        "latitude" => -23.12,
+        "longitude" => -44.12,
+        "altitude" => nil,
+        "cumulative_distance_m" => 0.0
+      )
+      expect(json["route"]["points"].last).to eq(
+        "sequence" => 2,
+        "latitude" => -23.14,
+        "longitude" => -44.14,
+        "altitude" => 710.5,
+        "cumulative_distance_m" => 1200.0
+      )
+    end
+
+    it "returns null route when the tracking session race has no route" do
+      race.race_route.destroy!
+
+      get "/api/v1/public/tracking/#{tracking_session.public_token}/route"
+
+      expect(response).to have_http_status(:ok)
+      expect(json).to eq("route" => nil)
+    end
+
     it "returns not found for an unknown public token" do
       get "/api/v1/public/tracking/missing"
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "returns not found for route with an unknown public token" do
+      get "/api/v1/public/tracking/missing/route"
 
       expect(response).to have_http_status(:not_found)
     end
