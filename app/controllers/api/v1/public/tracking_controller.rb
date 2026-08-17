@@ -31,7 +31,19 @@ module Api
         private
 
         def set_tracking_session
-          @tracking_session = TrackingSession.includes(:athlete, :race).find_by!(public_token: params[:public_token])
+          @tracking_session = TrackingSession
+                              .includes(:athlete, :race)
+                              .find_by!(public_lookup_param => public_lookup_value)
+        end
+
+        def public_lookup_param
+          params[:public_access_code].present? ? :public_access_code : :public_token
+        end
+
+        def public_lookup_value
+          return TrackingSession.normalize_public_access_code(params[:public_access_code]) if params[:public_access_code].present?
+
+          params[:public_token]
         end
 
         def public_location_payload(location_point)

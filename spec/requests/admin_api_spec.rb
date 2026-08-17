@@ -155,6 +155,7 @@ RSpec.describe "Admin API", type: :request do
       expect(json["tracking_session"]["public_token"]).to be_present
       expect(json["tracking_session"]["ingest_token"]).to be_present
       expect(json["tracking_session"]["athlete_access_code"]).to be_present
+      expect(json["tracking_session"]["public_access_code"]).to be_present
       expect(json["tracking_session"]["athlete"]["id"]).to eq(athlete.id)
     end
 
@@ -187,6 +188,7 @@ RSpec.describe "Admin API", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json["tracking_session"]["latest_location"]["latitude"]).to eq(-23.12)
+      expect(json["tracking_session"]["public_access_code"]).to eq(tracking_session.public_access_code)
     end
   end
 

@@ -31,6 +31,9 @@ module Api
               started_at: tracking_session.started_at.iso8601,
               finished_at: tracking_session.finished_at&.iso8601
             },
+            public_access: {
+              code: tracking_session.public_access_code
+            },
             server_credentials: {
               tracking_session_id: tracking_session.id,
               ingest_token: tracking_session.ingest_token

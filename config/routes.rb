@@ -11,6 +11,9 @@ Rails.application.routes.draw do
       end
 
       namespace :public do
+        get "tracking/code/:public_access_code", to: "tracking#show"
+        get "tracking/code/:public_access_code/locations", to: "tracking#locations"
+        get "tracking/code/:public_access_code/route", to: "tracking#route"
         get "tracking/:public_token", to: "tracking#show"
         get "tracking/:public_token/locations", to: "tracking#locations"
         get "tracking/:public_token/route", to: "tracking#route"

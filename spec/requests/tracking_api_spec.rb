@@ -13,7 +13,9 @@ RSpec.describe "Tracking API", type: :request do
       expect(json["public_token"]).to be_present
       expect(json["ingest_token"]).to be_present
       expect(json["athlete_access_code"]).to be_present
+      expect(json["public_access_code"]).to be_present
       expect(json["public_token"]).not_to eq(json["ingest_token"])
+      expect(json["public_access_code"]).not_to eq(json["athlete_access_code"])
     end
   end
 
@@ -29,6 +31,7 @@ RSpec.describe "Tracking API", type: :request do
       expect(json["athlete"]["name"]).to eq("Runner")
       expect(json["race"]["name"]).to eq("UTMB Paraty Test")
       expect(json["tracking"]["status"]).to eq("active")
+      expect(json["public_access"]["code"]).to eq(tracking_session.public_access_code)
       expect(json["server_credentials"]["tracking_session_id"]).to eq(tracking_session.id)
       expect(json["server_credentials"]["ingest_token"]).to eq(tracking_session.ingest_token)
       expect(response.body).not_to include(tracking_session.public_token)
@@ -189,12 +192,30 @@ RSpec.describe "Tracking API", type: :request do
       expect(response.body).not_to include(tracking_session.ingest_token)
     end
 
+    it "resolves public tracking by public access code" do
+      get "/api/v1/public/tracking/code/#{tracking_session.public_access_code}"
+
+      expect(response).to have_http_status(:ok)
+      expect(json["athlete"]["name"]).to eq("Runner")
+      expect(response.body).not_to include(tracking_session.ingest_token)
+      expect(response.body).not_to include(tracking_session.athlete_access_code)
+      expect(response.body).not_to include(tracking_session.public_token)
+    end
+
     it "returns paginated public locations in ascending order" do
       get "/api/v1/public/tracking/#{tracking_session.public_token}/locations", params: { per_page: 1 }
 
       expect(response).to have_http_status(:ok)
       expect(json["locations"].size).to eq(1)
       expect(json["pagination"]["per_page"]).to eq(1)
+      expect(response.body).not_to include("tracking_session_id")
+    end
+
+    it "returns paginated public locations by public access code" do
+      get "/api/v1/public/tracking/code/#{tracking_session.public_access_code}/locations", params: { per_page: 1 }
+
+      expect(response).to have_http_status(:ok)
+      expect(json["locations"].size).to eq(1)
       expect(response.body).not_to include("tracking_session_id")
     end
 
@@ -220,6 +241,16 @@ RSpec.describe "Tracking API", type: :request do
       expect(response.body).not_to include("ingest_token")
       expect(response.body).not_to include("athlete_access_code")
       expect(response.body).not_to include(tracking_session.ingest_token)
+    end
+
+    it "returns the public race route by public access code" do
+      get "/api/v1/public/tracking/code/#{tracking_session.public_access_code}/route"
+
+      expect(response).to have_http_status(:ok)
+      expect(json["route"]["points"].map { |point| point["sequence"] }).to eq([0, 1])
+      expect(response.body).not_to include("public_token")
+      expect(response.body).not_to include("ingest_token")
+      expect(response.body).not_to include("athlete_access_code")
     end
 
     it "returns route points ordered by sequence with the expected fields" do
@@ -268,10 +299,29 @@ RSpec.describe "Tracking API", type: :request do
       expect(response).to have_http_status(:not_found)
     end
 
+    it "returns not found for an unknown public access code" do
+      get "/api/v1/public/tracking/code/000000"
+
+      expect(response).to have_http_status(:not_found)
+    end
+
     it "returns not found for route with an unknown public token" do
       get "/api/v1/public/tracking/missing/route"
 
       expect(response).to have_http_status(:not_found)
+    end
+
+    it "does not allow public access code to write locations" do
+      post "/api/v1/tracking_sessions/#{tracking_session.id}/locations",
+           params: {
+             latitude: -23.13,
+             longitude: -44.13,
+             recorded_at: "2026-08-17T10:45:00-03:00"
+           },
+           headers: auth_headers(tracking_session.public_access_code),
+           as: :json
+
+      expect(response).to have_http_status(:unauthorized)
     end
   end
 
