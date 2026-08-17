@@ -16,6 +16,10 @@ Rails.application.routes.draw do
         get "tracking/:public_token/route", to: "tracking#route"
       end
 
+      namespace :athlete, module: :athlete_portal do
+        resource :session, only: :create
+      end
+
       namespace :admin do
         resource :session, only: [:create, :destroy]
         get "dashboard", to: "dashboard#show"

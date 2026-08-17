@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_08_17_190000) do
+ActiveRecord::Schema.define(version: 2026_08_17_201000) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -92,6 +92,8 @@ ActiveRecord::Schema.define(version: 2026_08_17_190000) do
     t.datetime "finished_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "athlete_access_code", null: false
+    t.index ["athlete_access_code"], name: "index_tracking_sessions_on_athlete_access_code", unique: true
     t.index ["athlete_id"], name: "index_tracking_sessions_on_athlete_id"
     t.index ["ingest_token"], name: "index_tracking_sessions_on_ingest_token", unique: true
     t.index ["public_token"], name: "index_tracking_sessions_on_public_token", unique: true

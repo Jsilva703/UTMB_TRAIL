@@ -154,6 +154,7 @@ RSpec.describe "Admin API", type: :request do
       expect(response).to have_http_status(:created)
       expect(json["tracking_session"]["public_token"]).to be_present
       expect(json["tracking_session"]["ingest_token"]).to be_present
+      expect(json["tracking_session"]["athlete_access_code"]).to be_present
       expect(json["tracking_session"]["athlete"]["id"]).to eq(athlete.id)
     end
 

@@ -12,7 +12,40 @@ RSpec.describe "Tracking API", type: :request do
       expect(json["status"]).to eq("active")
       expect(json["public_token"]).to be_present
       expect(json["ingest_token"]).to be_present
+      expect(json["athlete_access_code"]).to be_present
       expect(json["public_token"]).not_to eq(json["ingest_token"])
+    end
+  end
+
+  describe "POST /api/v1/athlete/session" do
+    let!(:tracking_session) { TrackingSession.create!(athlete: athlete, race: race) }
+
+    it "resolves an active athlete access code for server-side BFF use" do
+      post "/api/v1/athlete/session",
+           params: { code: tracking_session.athlete_access_code.downcase.insert(4, "-") },
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json["athlete"]["name"]).to eq("Runner")
+      expect(json["race"]["name"]).to eq("UTMB Paraty Test")
+      expect(json["tracking"]["status"]).to eq("active")
+      expect(json["server_credentials"]["tracking_session_id"]).to eq(tracking_session.id)
+      expect(json["server_credentials"]["ingest_token"]).to eq(tracking_session.ingest_token)
+      expect(response.body).not_to include(tracking_session.public_token)
+    end
+
+    it "does not resolve the public token as an athlete access code" do
+      post "/api/v1/athlete/session", params: { code: tracking_session.public_token }, as: :json
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "does not resolve finished sessions" do
+      tracking_session.finish!
+
+      post "/api/v1/athlete/session", params: { code: tracking_session.athlete_access_code }, as: :json
+
+      expect(response).to have_http_status(:not_found)
     end
   end
 
@@ -185,6 +218,7 @@ RSpec.describe "Tracking API", type: :request do
       expect(response.body).not_to include("race_route_id")
       expect(response.body).not_to include("public_token")
       expect(response.body).not_to include("ingest_token")
+      expect(response.body).not_to include("athlete_access_code")
       expect(response.body).not_to include(tracking_session.ingest_token)
     end
 

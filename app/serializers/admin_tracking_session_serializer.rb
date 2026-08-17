@@ -9,6 +9,7 @@ class AdminTrackingSessionSerializer
       status: tracking_session.status,
       public_token: tracking_session.public_token,
       ingest_token: tracking_session.ingest_token,
+      athlete_access_code: tracking_session.athlete_access_code,
       started_at: tracking_session.started_at.iso8601,
       finished_at: tracking_session.finished_at&.iso8601,
       athlete: {

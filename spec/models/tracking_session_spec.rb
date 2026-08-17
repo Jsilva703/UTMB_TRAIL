@@ -11,7 +11,12 @@ RSpec.describe TrackingSession, type: :model do
     expect(session.started_at).to be_present
     expect(session.public_token).to be_present
     expect(session.ingest_token).to be_present
+    expect(session.athlete_access_code).to match(/\A[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{8}\z/)
     expect(session.public_token).not_to eq(session.ingest_token)
+  end
+
+  it "normalizes athlete access codes typed with separators or lowercase" do
+    expect(described_class.normalize_athlete_access_code("ab23-cd45")).to eq("AB23CD45")
   end
 
   it "does not allow public_token and ingest_token to be equal" do
