@@ -11,15 +11,15 @@ module Api
         def locations
           per_page = [[params.fetch(:per_page, 50).to_i, 1].max, 100].min
           page = [params.fetch(:page, 1).to_i, 1].max
-          scope = @tracking_session.location_points.order(recorded_at: :asc, id: :asc)
-          points = scope.offset((page - 1) * per_page).limit(per_page)
+          points = Tracking::DistanceCalculator.new(tracking_session: @tracking_session).call.accepted_points
+          page_points = points.slice((page - 1) * per_page, per_page) || []
 
           render json: {
-            locations: points.map { |point| public_location_payload(point) },
+            locations: page_points.map { |point| public_location_payload(point) },
             pagination: {
               page: page,
               per_page: per_page,
-              total_count: scope.count
+              total_count: points.size
             }
           }
         end

@@ -186,10 +186,32 @@ RSpec.describe "Tracking API", type: :request do
       expect(response).to have_http_status(:ok)
       expect(json["athlete"]["name"]).to eq("Runner")
       expect(json["tracking"]["last_update_at"]).to be_present
+      expect(json["distance_traveled"]).to include(
+        "estimated_distance_m",
+        "estimated_distance_km",
+        "accepted_points_count",
+        "rejected_points_count"
+      )
       expect(json["route_progress"]["estimated_progress_percentage"]).to eq(100.0)
+      expect(json["route_progress"]["route_progress_m"]).to eq(1000.0)
       expect(json["route_progress"]["distance_from_route_m"]).to be_present
       expect(json["location"]["latitude"]).to eq(-23.13)
       expect(response.body).not_to include(tracking_session.ingest_token)
+    end
+
+    it "uses the latest valid filtered location in the public payload" do
+      tracking_session.location_points.create!(
+        latitude: -22.0,
+        longitude: -44.0,
+        accuracy: 360,
+        recorded_at: "2026-08-17T10:45:00-03:00"
+      )
+
+      get "/api/v1/public/tracking/#{tracking_session.public_token}"
+
+      expect(response).to have_http_status(:ok)
+      expect(json["location"]["latitude"]).to eq(-23.13)
+      expect(json["distance_traveled"]["rejected_points_count"]).to be >= 1
     end
 
     it "resolves public tracking by public access code" do

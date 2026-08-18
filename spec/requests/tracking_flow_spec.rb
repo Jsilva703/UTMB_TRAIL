@@ -33,6 +33,8 @@ RSpec.describe "Tracking flow", type: :request do
     expect(response).to have_http_status(:ok)
     expect(json["athlete"]["name"]).to eq("Flow Runner")
     expect(json["tracking"]["last_update_at"]).to eq("2026-08-17T13:04:00Z")
+    expect(json["distance_traveled"]["estimated_distance_m"]).to eq(0.0)
+    expect(json["distance_traveled"]["accepted_points_count"]).to eq(1)
     expect(json["route_progress"]["estimated_progress_percentage"]).to eq(100.0)
     expect(json["route_progress"]["distance_from_route_m"]).to be < 1
     expect(response.body).not_to include(ingest_token)
